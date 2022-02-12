@@ -45,8 +45,8 @@ build_model_lstm <- function(vocab_size, embedding_dim, rnn_units, batch_size){
   model <- keras_model_sequential() %>%
     layer_embedding(input_dim = vocab_size, 
                     output_dim = embedding_dim,
-                    batch_size = batch_size) %>%
-    # layer_dropout(rate = 0.5)%>%
+                    batch_size = c(batch_size,NULL)) %>%
+    layer_dropout(rate = 0.5)%>%
 
     layer_lstm(
       units = rnn_units, 
@@ -56,7 +56,9 @@ build_model_lstm <- function(vocab_size, embedding_dim, rnn_units, batch_size){
       recurrent_activation='sigmoid',
       stateful = TRUE
     ) %>%
-    # layer_dropout(rate = 0.5)%>%
+    
+    layer_dropout(rate = 0.5)%>%
+    
     layer_dense(vocab_size,activation = "sigmoid")
   
   model %>% compile(

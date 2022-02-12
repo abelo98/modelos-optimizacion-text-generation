@@ -5,7 +5,7 @@ library(keras)
 library(foreign)
 
 db <- file.choose()
-dataset<-read.spss("uk_4wave_caddi_data.sav", to.data.frame = TRUE)
+dataset<-read.spss(db, to.data.frame = TRUE)
 
 map_seqs2char<-map_seq2index(data_set = dataset,start_idx = 167,stop_idx = 310)
 vocab <- tail(map_seqs2char,1)[[1]] + 1
@@ -15,15 +15,15 @@ f_dataSet <- convert_dataSet(dataset,167,310)
 f_dataSet
 
 dataSet2tensor <- make_tensor(map_seqs2char,f_dataSet)
-training_set <- get_batch(dataSet2tensor, 100,4360)
+training_set <- get_batch(dataSet2tensor,60 ,4000)
 input_train <- training_set$x
 output_train <- training_set$y
 
-batch <- 4
+batch <- 16
 emb_dim <- 64 
-rnn_u <- 32
+rnn_u <- 64
 learning_rate<-0.0001
-epochs <- 10
+epochs <- 60
 validation_perct<-0.2
 checkpoint_path <- "checkpoints/cp.ckpt"
 
@@ -38,6 +38,9 @@ gen_model %>% reset_states()
 
 gen_model %>% save_model_hdf5("generator_model.h5")
 summary(gen_model)
+
+gen <-  load_model_hdf5("generator_model.h5")
+summary(gen)
 
 
 # 
