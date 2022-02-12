@@ -1,6 +1,14 @@
 library(keras)
 library(kerasR)
 
+# Create checkpoint callback
+cp_callback <- callback_model_checkpoint(
+  filepath = checkpoint_path,
+  save_weights_only = TRUE,
+  save_best_only = TRUE,
+  verbose = 1
+)
+
 build_model_simple_rnn <- function(vocab_size, embedding_dim, rnn_units, batch_size){
   model <- keras_model_sequential() %>%
     layer_embedding(input_dim = vocab_size, 
@@ -16,14 +24,14 @@ build_model_simple_rnn <- function(vocab_size, embedding_dim, rnn_units, batch_s
     ) %>%
     layer_dropout(rate = 0.5)%>%
     layer_simple_rnn(
-      units = rnn_units, 
+      units = rnn_units,
       return_sequences=TRUE,
       kernel_regularizer = regularizer_l2(0.001),
       recurrent_initializer='glorot_uniform',
       stateful = TRUE
     ) %>%
     layer_dropout(rate = 0.5)%>%
-    layer_dense(vocab_size,activation='sigmoid',)
+    layer_dense(vocab_size,activation='sigmoid')
   return(model)
 }
 
@@ -40,44 +48,29 @@ build_model_lstm <- function(vocab_size, embedding_dim, rnn_units, batch_size){
       recurrent_activation='sigmoid',
       stateful = TRUE
     ) %>%
-    
-    
     layer_dropout(rate = 0.5)%>%
-    layer_dense(vocab_size)
+    layer_dense(vocab_size,activation = "sigmoid")
   return(model)
+}
+
+compile_and_train <- function(model,no_epochs,size_batch,learning_rate,validtion,input_train, output_train){
+  model %>% compile(
+    optimizer=optimizer_adam(learning_rate = learning_rate),
+    loss = "sparse_categorical_crossentropy",
+    metrics = c("acc")
+  )
+  
+  history <- model %>% fit(
+    input_train, output_train,
+    epochs = no_epochs,
+    batch_size = size_batch,
+    callbacks = list(cp_callback), # pass callback to training,
+    verbose = 2,
+    validation_split = validtion
+  )
+  
+  model %>% save_model_tf("training_model")
 }
 
 
 
-# ### Prediction of a generated song ###
-# 
-# generate_text<-function(model, start_string, map_seqs2char, generation_length=1000){
-#   # Evaluation step (generating ABC text using the learned RNN model)
-# 
-# input_eval <- c(map_seqs2char$start_string)
-# input_eval <- expand_dims(input_eval,0)
-# 
-# # Empty string to store our results
-# text_generated = list(start_string)
-# 
-# # Here batch size == 1
-# model %>% reset_states()
-# 
-# for (i in 0:generation_length){
-#   predictions <- model(input_eval)
-# 
-#   predictions < tf$squeeze(predictions,0L)
-# 
-# 
-# predicted_id <-  tf$random$categorical(predictions, num_samples=1)
-# as.array(predicted_id)
-# 
-# # Pass the prediction along with the previous hidden state
-# #   as the next inputs to the model
-# input_eval = expand_dims(predicted_id, 0)
-# 
-# text_generated[i]<-(names(map_seqs2char)[predicted_id[1]]) 
-# 
-# }
-# return(text_generated)
-# }

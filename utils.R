@@ -1,6 +1,6 @@
 library(foreign)
 library(TraMineR)
-# library(comprehenr)
+
 
 fix_seq<-function(seq){
   fseq <-gsub("  ","",seq) 
@@ -71,3 +71,5 @@ get_batch<-function(vectorized_data, seq_legth, batch_size){
   }
   return(list("x" = x_batch, "y" = y_batch))
 }
+
+
