@@ -46,16 +46,18 @@ build_model_lstm <- function(vocab_size, embedding_dim, rnn_units, batch_size){
     layer_embedding(input_dim = vocab_size, 
                     output_dim = embedding_dim,
                     batch_size = batch_size) %>%
-    layer_dropout(rate = 0.5)%>%
+    # layer_dropout(rate = 0.5)%>%
+
     layer_lstm(
       units = rnn_units, 
       return_sequences=TRUE,
+      kernel_regularizer = regularizer_l2(0.001),
       recurrent_initializer='glorot_uniform',
       recurrent_activation='sigmoid',
       stateful = TRUE
     ) %>%
-    layer_dropout(rate = 0.5)%>%
-    layer_dense(vocab_size,activation = "softmax")
+    # layer_dropout(rate = 0.5)%>%
+    layer_dense(vocab_size,activation = "sigmoid")
   
   model %>% compile(
     optimizer=optimizer_adam(learning_rate = learning_rate),
@@ -74,6 +76,7 @@ train_model <- function(model,no_epochs,size_batch,learning_rate,validtion,input
     verbose = 2,
     validation_split = validtion
   )
+  plot(history)
   
   model %>% save_model_hdf5("training_model.h5")
 }
