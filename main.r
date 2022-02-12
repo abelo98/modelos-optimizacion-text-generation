@@ -5,15 +5,14 @@ library(keras)
 library(foreign)
 
 db <- file.choose()
-db
-dataset <- read.spss(db, to.data.frame = TRUE)
-data(dataset)
+dataset<-read.spss("uk_4wave_caddi_data.sav", to.data.frame = TRUE)
 
 map_seqs2char<-map_seq2index(data_set = dataset,start_idx = 167,stop_idx = 310)
 vocab <- tail(map_seqs2char,1)[[1]] + 1
-
+map_seqs2char
 
 f_dataSet <- convert_dataSet(dataset,167,310)
+f_dataSet
 
 dataSet2tensor <- make_tensor(map_seqs2char,f_dataSet)
 training_set <- get_batch(dataSet2tensor, 100,4360)

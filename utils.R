@@ -4,8 +4,8 @@ library(TraMineR)
 
 fix_seq<-function(seq){
   fseq <-gsub("  ","",seq) 
-  if (substring(y,nchar(y),nchar(y)) == " "){
-    y <- substr(y,1,nchar(y)-1)
+  if (substring(fseq,nchar(fseq),nchar(fseq)) == " "){
+    fseq <- substr(fseq,1,nchar(fseq)-1)
   }
   return(fseq)
 }
