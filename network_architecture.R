@@ -32,6 +32,12 @@ build_model_simple_rnn <- function(vocab_size, embedding_dim, rnn_units, batch_s
     ) %>%
     layer_dropout(rate = 0.5)%>%
     layer_dense(vocab_size,activation='sigmoid')
+  
+  model %>% compile(
+    optimizer=optimizer_adam(learning_rate = learning_rate),
+    loss = "sparse_categorical_crossentropy",
+    metrics = c("acc")
+  )
   return(model)
 }
 
@@ -49,17 +55,17 @@ build_model_lstm <- function(vocab_size, embedding_dim, rnn_units, batch_size){
       stateful = TRUE
     ) %>%
     layer_dropout(rate = 0.5)%>%
-    layer_dense(vocab_size,activation = "sigmoid")
-  return(model)
-}
-
-compile_and_train <- function(model,no_epochs,size_batch,learning_rate,validtion,input_train, output_train){
+    layer_dense(vocab_size,activation = "softmax")
+  
   model %>% compile(
     optimizer=optimizer_adam(learning_rate = learning_rate),
     loss = "sparse_categorical_crossentropy",
     metrics = c("acc")
   )
-  
+  return(model)
+}
+
+train_model <- function(model,no_epochs,size_batch,learning_rate,validtion,input_train, output_train){
   history <- model %>% fit(
     input_train, output_train,
     epochs = no_epochs,
@@ -69,7 +75,7 @@ compile_and_train <- function(model,no_epochs,size_batch,learning_rate,validtion
     validation_split = validtion
   )
   
-  model %>% save_model_tf("training_model")
+  model %>% save_model_hdf5("training_model.h5")
 }
 
 

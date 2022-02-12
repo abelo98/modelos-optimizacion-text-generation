@@ -1,7 +1,7 @@
 
-trainM <- load_model_tf("training_model")
+trainM <-  load_model_hdf5("training_model.h5")
 summary(trainM)
-gen <- load_model_tf("generator_model")
+gen <-  load_model_hdf5("generator_model.h5")
 summary(gen)
 
 
