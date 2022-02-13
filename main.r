@@ -24,9 +24,9 @@ output_train <- training_set$y
 
 batch <- 32
 emb_dim <- 64 
-rnn_u <- 64
+rnn_u <- 128
 learning_rate<-0.0001
-epochs <- 50
+epochs <- 55
 validation_perct<-0.2
 checkpoint_path <- "checkpoints/cp.ckpt"
 

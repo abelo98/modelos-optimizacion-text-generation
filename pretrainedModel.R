@@ -14,21 +14,4 @@ seed_text<-"Sleeping"
 
 map_seqs2char<-map_seq2index(data_set = dataset,start_idx = start_i,stop_idx = stop_i)
 
-
-input_eval <- list(map_seqs2char[[seed_text]])
-input_eval <- tf$expand_dims(input_eval,0L)
-text_generated <- list(seed_text)
-
-
-for (i in 2:size) {
-  predictions <- gen(input_eval)
-  predictions < tf$squeeze(predictions,0L)
-  
-  predicted_id <- tf$random$categorical(predictions[1,,], num_samples=1L)
-  input_eval<-predicted_id
-  converted_pred_id <- as.double(predicted_id[1,1]) + 1
-  text_generated[i]<-(names(map_seqs2char)[converted_pred_id])
-}
-print(text_generated)
-write.csv(text_generated, "data_gen.csv")
-write.table(text_generated, file = "data_gen.txt",col.names = FALSE)
+text_generation(seed_text,map_seqs2char,size,gen)

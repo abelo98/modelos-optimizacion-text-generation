@@ -33,15 +33,15 @@ En caso de querer trabajar con los hiperparámetros puede cambiar los siguientes
 ```R
 batch <- 32
 emb_dim <- 64 
-rnn_u <- 64
+rnn_u <- 128
 learning_rate<-0.0001
-epochs <- 50
+epochs <- 55
 validation_perct<-0.2
 ```
 
 Después de varios experimentos para encontrar el modelo más preciso, los anteriores hiperparámetros se consideraron los más eficientes. En esta decisión influyen muchas cuestione; por ejemplo seleccionar una mayor cantidad de $recurrent \space neural \space network \space units$ ($rnn\_u$) contribuirá a un mayor conocimiento de los patrones subyacentes en los datos, pero también tributa a que exista un mayor $overfitting$ en el modelo y el poder de cómputo es fundamental para aumentar dicha cantidad, pues de lo contrario se tarda mucho el proceso de aprendizaje si se incrementa este valor. Otro parámetro importante para que la red "aprenda" más sería incrementar el número de $epochs$. 
 
-La conclusión final es que reajustando dichos parámetros para obtener mejores resultados nunca se llegó a sobrepasar el $90\%$ de precisión, para ello se llegó a trabajar con una mayor cantidad de $rnn\_u$, $emb_dim$ y de $epochs$. Mientras que con el modelo actual se alcanza un $88\%$
+La conclusión final es que reajustando dichos parámetros para obtener mejores resultados nunca se llegó a sobrepasar el $90\%$ de precisión, para ello se llegó a trabajar con una mayor cantidad de $rnn\_u$, $emb\_dim$ y de $epochs$. Mientras que con el modelo actual se alcanza un $88\%$ de precisión aproximadamente.
 
 Después de haber reajustado los parámetros y los datos se procede a compilar la arquitectura planteada con los nuevos valores y a ejecutar el proceso de entrenamiento. Automáticamente se guarda dicho modelo. Los valores del modelo guardado deben ser cargados en una nueva red que solo cambia la forma en que recibe las entradas y es la utilizada para generar los nuevos datos. Este nuevo modelo se guarda y luego corriendo el archivo $pretrainedModel.R$ se obtienen los resultados.
 
@@ -81,4 +81,48 @@ que significa que cada coeficiente en la matriz de peso de la capa agregará $0.
 Finalmente la última técnica aplicada fue $Dropout$ o abandono. Esta técnica de regularización, aplicado a una capa, consiste en aleatoriamente establecer en cero una serie de valores de salida de la capa durante el entrenamiento. Para ello se escoge entre un $20\%$ a $50\%$. De esta forma se fuerza a la red a no confiarse de ningún nodo y se evita que se aprenda patrones que son significantes y que de no agregar este ruido lo haría.
 
 Para la otra arquitectura se utilizan las mismas técnicas solo que se tienen dos capas de redes neuronales recurrentes simples en lugar de una $LSTM$.
+
+En la siguiente imagen se puede apreciar la arquitectura fabricada, junto con las dimensiones de cada capa y los parámetros a entrenar.
+
+![Screenshot from 2022-02-13 01-17-36](/media/abelo/Local Disk/4to/Mio/2do Semestre/MO II/project/Screenshot from 2022-02-13 01-17-36.png)
+
+
+
+En esta imagen se muestra la arquitectura del modelo encargado de generar los datos. A diferencia del anterior este recibe solo una actividad y genera la próxima según la distribución aprendida y esta nueva genera la próxima, hasta obtener todas las deseadas.
+
+![Screenshot from 2022-02-13 01-46-42](/media/abelo/Local Disk/4to/Mio/2do Semestre/MO II/project/Screenshot from 2022-02-13 01-46-42.png)
+
+#### Flujo de trabajo
+
+En la siguiente imagen se hace un resumen de como se lleva a cabo el flujo de trabajo, desde que se obtienen los datos hasta que se generan las nuevas distribuciones.
+
+![Screenshot from 2022-02-13 00-57-50](/media/abelo/Local Disk/4to/Mio/2do Semestre/MO II/project/Screenshot from 2022-02-13 00-57-50.png)
+
+
+
+#### Módulo Utils
+
+En este módulo se encuentran aquellas funciones básicas empleadas para el procesamiento de los datos. Con ellas se logra partir de un dataset cualquiera, acceder a la información que se desea y convertirla en un set de entrenamiento.
+
+$fix\_seq$ es una función muy particular que se crea solo para que no cuando se extraigan las actividades, se obtenga solo un string con los caracteres que la conforman, eliminando los espacios en blanco al final de la secuencia extraída que estén de sobra.
+
+$convert\_dataSet$ es la función encargada de extraer las actividades del dataset entregado a partir de la columna inicio que escojamos hasta la final.
+
+$clean\_data$ es la encargada de eliminar los espacio demás de un conjunto de secuencias.
+
+$map\_seq2index$ es con la función que obtenemos las actividades, únicas del set de actividades, las procesamos y creamos una diccionario de secuencias. De tal forma que si se desea saber el número que representa una actividad, se indexa dicha actividad y se obtiene. De forma contraria podemos obtener las actividades con el uso de la función $names$ de R.
+
+$make\_tensor$ permite, usando el diccionario de actividades y el data set de las mismas, obtener un nuevo data set con los valores que representan.
+
+$get\_batch$ Es la función que permite construir el set de entrenamiento. Para ello se seleccionan de forma aleatoria $batch\_size$ secuencias de actividades del set vectorizado y luego de forma aleatoria se toma un índice de dicha secuencia para crear uno de los $batch\_size$ datos de entrada con que se entrena la red. Los datos con que se evalúa la red neuronal son los mismos, solo que corridos una posición a la derecha. Ejemplo, si tenemos $input=[x_1,x_2,x_3,x_4]$ entonces se tendrá $output=[x_2,x_3,x_4,x_5]$. Y así se repite el proceso hasta obtener una matriz de tamaño $batch\_size\space X \space seq\_length$.
+
+$text\_generation$ esta función es la empleada para guardar y generar los datos.
+
+#### Particularidades
+
+La falta de una mayor cantidad de datos y de un equipo de cómputo más potente no permiten obtener mejores resultados que los que se ofrecen. A pesar de estos inconvenientes se logra un generador de datos de actividades con una precisión durante el entrenamiento de $88.48\%$ y una precisión de $0.8928\%$ con el set de validación, a las que se les puede asignar distintos espacios de tiempo en que se realizan.
+
+Esto generador permite generar secuencias tan largo como se quiera y tantas como se desee. Solo se debe interactuar con el modelo provisto y previamente entrenado.
+
+#### Anexos
 
