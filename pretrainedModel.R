@@ -1,14 +1,24 @@
 library(keras)
 library(tensorflow)
 
-gen <-  load_model_hdf5("generator_model.h5")
+gen <-  load_model_hdf5("generator_model.h5",compile=FALSE)
 summary(gen)
 
+db <- file.choose()
+dataset<-read.spss(db, to.data.frame = TRUE)
 
-input_eval <- list(map_seqs2char$Sleeping)
-input_eval <- tf$expand_dims(input_eval,0L)
-text_generated <- list(seed_word)
+start_i <- 167
+stop_i <- 310
 size <- 30
+seed_text<-"Sleeping"
+
+map_seqs2char<-map_seq2index(data_set = dataset,start_idx = start_i,stop_idx = stop_i)
+
+
+input_eval <- list(map_seqs2char[[seed_text]])
+input_eval <- tf$expand_dims(input_eval,0L)
+text_generated <- list(seed_text)
+
 
 for (i in 2:size) {
   predictions <- gen(input_eval)
